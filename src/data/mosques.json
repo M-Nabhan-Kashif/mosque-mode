@@ -1,0 +1,37 @@
+[
+  {
+    "id": "1",
+    "name": "Grand Mosque",
+    "latitude": 21.4225,
+    "longitude": 39.8262,
+    "address": "Mecca, Saudi Arabia"
+  },
+  {
+    "id": "2",
+    "name": "Al-Masjid an-Nabawi",
+    "latitude": 24.4672,
+    "longitude": 39.6111,
+    "address": "Medina, Saudi Arabia"
+  },
+  {
+    "id": "3",
+    "name": "Al-Aqsa Mosque",
+    "latitude": 31.7767,
+    "longitude": 35.2345,
+    "address": "Jerusalem"
+  },
+  {
+    "id": "4",
+    "name": "Islamic Center of America",
+    "latitude": 42.3142,
+    "longitude": -83.1763,
+    "address": "Dearborn, Michigan, USA"
+  },
+  {
+    "id": "5",
+    "name": "London Central Mosque",
+    "latitude": 51.5247,
+    "longitude": -0.1678,
+    "address": "London, UK"
+  }
+]
