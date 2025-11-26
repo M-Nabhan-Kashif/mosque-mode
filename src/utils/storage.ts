@@ -1,7 +1,8 @@
 import { Preferences } from '@capacitor/preferences';
-import { UserSettings } from '@/types/mosque';
+import { UserSettings, AudioSettings } from '@/types/mosque';
 
 const SETTINGS_KEY = 'mosque_app_settings';
+const AUDIO_SETTINGS_KEY = 'saved_audio_settings';
 
 export const defaultSettings: UserSettings = {
   enabled: true,
@@ -51,6 +52,49 @@ export async function clearSettings(): Promise<void> {
     await Preferences.remove({ key: SETTINGS_KEY });
   } catch (error) {
     console.error('Error clearing settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Save audio settings before entering mosque mode
+ */
+export async function saveAudioSettings(settings: AudioSettings): Promise<void> {
+  try {
+    await Preferences.set({
+      key: AUDIO_SETTINGS_KEY,
+      value: JSON.stringify(settings)
+    });
+  } catch (error) {
+    console.error('Error saving audio settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Load saved audio settings
+ */
+export async function loadAudioSettings(): Promise<AudioSettings | null> {
+  try {
+    const { value } = await Preferences.get({ key: AUDIO_SETTINGS_KEY });
+    if (value) {
+      return JSON.parse(value);
+    }
+    return null;
+  } catch (error) {
+    console.error('Error loading audio settings:', error);
+    return null;
+  }
+}
+
+/**
+ * Clear saved audio settings
+ */
+export async function clearAudioSettings(): Promise<void> {
+  try {
+    await Preferences.remove({ key: AUDIO_SETTINGS_KEY });
+  } catch (error) {
+    console.error('Error clearing audio settings:', error);
     throw error;
   }
 }
