@@ -6,9 +6,10 @@ import { MosqueCard } from "@/components/MosqueCard";
 import { Settings, MapPin, RefreshCw } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { Mosque, UserSettings } from "@/types/mosque";
+import { Mosque, UserSettings, AudioSettings } from "@/types/mosque";
 import { getCurrentPosition, findNearbyMosques, requestLocationPermissions } from "@/utils/location";
-import { loadSettings } from "@/utils/storage";
+import { loadSettings, saveAudioSettings, loadAudioSettings } from "@/utils/storage";
+import AudioControl from "@/plugins/AudioControl";
 import mosquesData from "@/data/mosques.json";
 
 const Index = () => {
@@ -19,6 +20,7 @@ const Index = () => {
   const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
   const [settings, setSettings] = useState<UserSettings | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [savedAudioSettings, setSavedAudioSettings] = useState<AudioSettings | null>(null);
 
   useEffect(() => {
     initializeApp();
@@ -60,17 +62,43 @@ const Index = () => {
       const inMosque = nearby.find(mosque => mosque.distance! <= (settings?.geofenceRadius || 100));
       
       if (inMosque && !isInMosque) {
-        setIsInMosque(true);
-        setCurrentMosque(inMosque);
-        toast.success(`Entered ${inMosque.name}`, {
-          description: "Phone silenced automatically"
-        });
+        // Entering mosque - apply mosque mode
+        try {
+          const previousSettings = await AudioControl.applyMosqueMode();
+          const audioSettings: AudioSettings = {
+            volume: previousSettings.previousVolume,
+            ringerMode: previousSettings.previousRingerMode
+          };
+          setSavedAudioSettings(audioSettings);
+          await saveAudioSettings(audioSettings);
+          
+          setIsInMosque(true);
+          setCurrentMosque(inMosque);
+          toast.success(`Entered ${inMosque.name}`, {
+            description: "Phone silenced automatically"
+          });
+        } catch (error) {
+          console.error("Failed to apply mosque mode:", error);
+          toast.error("Failed to silence phone");
+        }
       } else if (!inMosque && isInMosque) {
-        setIsInMosque(false);
-        toast.info("Left mosque area", {
-          description: "Audio settings restored"
-        });
-        setCurrentMosque(undefined);
+        // Leaving mosque - restore previous settings
+        try {
+          const settings = savedAudioSettings || await loadAudioSettings();
+          if (settings) {
+            await AudioControl.restoreFromMosqueMode(settings);
+            setSavedAudioSettings(null);
+          }
+          
+          setIsInMosque(false);
+          toast.info("Left mosque area", {
+            description: "Audio settings restored"
+          });
+          setCurrentMosque(undefined);
+        } catch (error) {
+          console.error("Failed to restore audio settings:", error);
+          toast.error("Failed to restore audio settings");
+        }
       }
 
       toast.success("Location updated");

@@ -23,3 +23,8 @@ export interface MonitoringState {
   nearbyMosques: Mosque[];
   lastUpdate: Date;
 }
+
+export interface AudioSettings {
+  volume: number;
+  ringerMode: 'silent' | 'vibrate' | 'normal';
+}
