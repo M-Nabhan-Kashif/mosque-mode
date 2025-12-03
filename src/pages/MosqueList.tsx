@@ -7,6 +7,7 @@ import { useNavigate } from "react-router-dom";
 import { Mosque } from "@/types/mosque";
 import { getCurrentPosition, findNearbyMosques } from "@/utils/location";
 import mosquesData from "@/data/mosques.json";
+import { loadSettings } from "@/utils/storage";
 
 const MosqueList = () => {
   const navigate = useNavigate();
@@ -22,8 +23,11 @@ const MosqueList = () => {
       const position = await getCurrentPosition();
       const { latitude, longitude } = position.coords;
       
+      const settings = await loadSettings();
+      const searchRadius = settings.searchRadius || 50000;
+
       const allMosques = mosquesData as Mosque[];
-      const nearby = findNearbyMosques(latitude, longitude, allMosques, 50000); // 50km radius
+      const nearby = await findNearbyMosques(latitude, longitude, allMosques, searchRadius);
       setMosques(nearby);
     } catch (error) {
       console.error("Failed to load mosques:", error);

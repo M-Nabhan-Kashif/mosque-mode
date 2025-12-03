@@ -58,13 +58,41 @@ export function isInGeofence(
 /**
  * Find nearest mosques to user location
  */
-export function findNearbyMosques(
+import { supabase } from '@/lib/supabase';
+
+/**
+ * Find nearest mosques to user location
+ * Fetches from Supabase and falls back to local data/cache
+ */
+export async function findNearbyMosques(
   userLat: number,
   userLon: number,
-  mosques: Mosque[],
+  localMosques: Mosque[],
   maxDistance: number = 5000 // 5km default
-): Mosque[] {
-  return mosques
+): Promise<Mosque[]> {
+  let mosquesToSearch = localMosques;
+
+  try {
+    // Fetch verified mosques from Supabase using spatial query
+    const { data, error } = await supabase
+      .rpc('nearby_mosques', {
+        lat: userLat,
+        long: userLon,
+        radius_meters: maxDistance
+      });
+
+    if (!error && data) {
+      mosquesToSearch = [...localMosques, ...data];
+      // Remove duplicates based on ID
+      const uniqueMosques = Array.from(new Map(mosquesToSearch.map(m => [m.id, m])).values());
+      mosquesToSearch = uniqueMosques;
+    }
+  } catch (err) {
+    console.error("Failed to fetch mosques from Supabase:", err);
+    // Continue with local data
+  }
+
+  return mosquesToSearch
     .map(mosque => ({
       ...mosque,
       distance: calculateDistance(userLat, userLon, mosque.latitude, mosque.longitude)

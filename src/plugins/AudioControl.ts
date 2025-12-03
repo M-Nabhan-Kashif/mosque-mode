@@ -56,17 +56,14 @@ export interface AudioControlPlugin {
   /**
    * Apply mosque mode (save current settings and silence)
    */
-  applyMosqueMode(): Promise<{ 
-    previousVolume: number;
-    previousRingerMode: 'silent' | 'vibrate' | 'normal';
-  }>;
+  applyMosqueMode(): Promise<{ success: boolean }>;
 
   /**
    * Restore from mosque mode
    */
-  restoreFromMosqueMode(options: { 
-    volume: number;
-    ringerMode: 'silent' | 'vibrate' | 'normal';
+  restoreFromMosqueMode(options?: { 
+    volume?: number;
+    ringerMode?: 'silent' | 'vibrate' | 'normal';
   }): Promise<void>;
 }
 

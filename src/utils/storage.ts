@@ -7,7 +7,9 @@ const AUDIO_SETTINGS_KEY = 'saved_audio_settings';
 export const defaultSettings: UserSettings = {
   enabled: true,
   geofenceRadius: 100,
+  searchRadius: 5000,
   notificationsEnabled: true,
+  backgroundUpdatesEnabled: false,
 };
 
 /**
